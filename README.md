@@ -1,4 +1,7 @@
----
+# A.M.A.E.-System
+Hier ist der Code für die SVG-Illustration, die als **technische 2D-Schnittzeichnung** (im 3D-Look durch Schattierung und Verlauf) das A.M.A.E.-System auf schwarzem Grund darstellt.
+
+```xml
 <svg width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
   <!-- Hintergrund: Absolutes Schwarz -->
   <rect width="100%" height="100%" fill="#000000"/>
@@ -42,4 +45,12 @@
   <text x="60" y="80" fill="#FFF" font-family="monospace" font-size="10">TEMP: 1.4x10^9 K</text>
   <text x="60" y="100" fill="#FFF" font-family="monospace" font-size="10">DRUCK: 2.3x10^11 Bar</text>
 </svg>
----
+
+```
+
+### **Anmerkungen zur Grafik-Struktur:**
+
+* **Geometrische Illusion:** Ich habe `fill-opacity` und `radialGradient` verwendet, um bei Modul 3 (Plasma) und Modul 7 (Kern) Leuchteffekte zu simultieren, die Tiefe in einem sonst flachen Vektorbild erzeugen.
+* **Hierarchie:** Die Anordnung folgt exakt dem gewünschten Fluss: Müll-Presse (unten) -> Zersetzungs-Wirbel (Mitte) -> Helices (Synthese) -> Kern (Annihilation) -> Output (Grün).
+* **Sauberkeit:** Durch die Verwendung von Vektoren bleibt die technische Klarheit gewahrt, die für Baupläne und physikalische Simulationen essenziell ist.
+

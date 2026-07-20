@@ -1,5 +1,4 @@
 ---
-
 <svg width="800" height="800" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
   <!-- Hintergrund: Absolutes Schwarz -->
   <rect width="100%" height="100%" fill="#000000"/>
@@ -43,5 +42,4 @@
   <text x="60" y="80" fill="#FFF" font-family="monospace" font-size="10">TEMP: 1.4x10^9 K</text>
   <text x="60" y="100" fill="#FFF" font-family="monospace" font-size="10">DRUCK: 2.3x10^11 Bar</text>
 </svg>
-
 ---

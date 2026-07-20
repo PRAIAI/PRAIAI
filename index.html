@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@PRAIAI #Profile & A.M.A.E. Quantum-Safe Comm-Platform</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --text: #00ff00;
+            --border: #003300;
+            --panel: #050505;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.1);
+            box-sizing: border-box;
+        }
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid var(--border);
+        }
+        input, textarea, button {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--text);
+            color: var(--text);
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        button {
+            cursor: pointer;
+            background: var(--border);
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: var(--text);
+            color: #000;
+        }
+        .chat-area {
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            padding: 10px;
+            background: #020202;
+            margin-bottom: 10px;
+        }
+        .msg {
+            margin-bottom: 8px;
+            padding: 4px;
+            border-left: 3px solid var(--text);
+            font-size: 0.9rem;
+        }
+        .system-status {
+            font-size: 0.8rem;
+            color: #888;
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>A.M.A.E. Platform</h1>
+    <div class="system-status">🔒 AES-256-GCM // SHA-256 // QUANTUM-RESISTANT PBKDF2</div>
+
+    <!-- STEP 1: AUTHENTICATION -->
+    <div class="section" id="auth-section">
+        <h2>1. Matrix Authentifizierung</h2>
+        <input type="text" id="username" placeholder="Benutzername (@Satoramy)">
+        <input type="password" id="password" placeholder="Quantensicheres Master-Passwort">
+        <button onclick="initializeCrypto()">Schlüsselvektoren generieren</button>
+        <div id="auth-status" style="margin-top:10px; color: #ff0000;">Keine Schlüssel im Speicher.</div>
+    </div>
+
+    <!-- STEP 2: COMMS PLATFORM -->
+    <div class="section" id="comm-section" style="display:none;">
+        <h2>2. Verschlüsselter Chat (Serverlos / P2P)</h2>
+        
+        <div class="chat-area" id="chatBox">
+            <div class="msg"><i>System: Bereit für semantischen Nachrichtenaustausch. Senden Sie verschlüsselte Textblöcke an Ihre Kontakte.</i></div>
+        </div>
+
+        <input type="text" id="messageInput" placeholder="Deine Nachricht verfassen...">
+        <button onclick="encryptAndShowMessage()">Nachricht verschlüsseln & exportieren</button>
+        
+        <textarea id="outputCipher" rows="4" readonly placeholder="Kryptografischer Ausgabe-Vektor (Diesen Block kopieren und der Community senden)"></textarea>
+
+        <hr style="border-color: var(--border); margin: 20px 0;">
+
+        <h2>3. Eingehenden Vektor entschlüsseln</h2>
+        <textarea id="inputCipher" rows="4" placeholder="Füge hier den verschlüsselten Textblock eines anderen Users ein..."></textarea>
+        <button onclick="decryptIncomingMessage()">Vektor paritätisch aufschlüsseln</button>
+    </div>
+</div>
+
+<script>
+    let derivedKey = null;
+    let currentUsername = "";
+
+    // Hilfsfunktion: Text in ArrayBuffer umwandeln
+    function textToBuffer(text) {
+        return new TextEncoder().encode(text);
+    }
+
+    // Hilfsfunktion: ArrayBuffer in Text umwandeln
+    function bufferToText(buffer) {
+        return new TextDecoder().decode(buffer);
+    }
+
+    // Base64 Konverter für Handys/Textplattformen
+    function arrayBufferToBase64(buffer) {
+        let binary = '';
+        let bytes = new Uint8Array(buffer);
+        let len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    }
+
+    function base64ToArrayBuffer(base64) {
+        let binary_string = window.atob(base64);
+        let len = binary_string.length;
+        let bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    // KRYPTOGRAFISCHE MATRIX INITIALISIERUNG
+    async function initializeCrypto() {
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value;
+
+        if(!user || !pass) {
+            alert("Bitte Benutzername und Passwort eingeben!");
+            return;
+        }
+
+        try {
+            currentUsername = user;
+            
+            // Verwende den Usernamen als deterministisches Salt gegen Grover-Preimage-Angriffe
+            const saltBuffer = textToBuffer(user + "AxiomatrixSalt2026");
+            const passBuffer = textToBuffer(pass);
+
+            // Basis-Schlüssel generieren
+            const baseKey = await window.crypto.subtle.importKey(
+                "raw", passBuffer, "PBKDF2", false, ["deriveKey"]
+            );
+
+            // Hochskalierte Schlüsselableitung (Quanten-Resistenz durch Iterations-Gewichtung)
+            derivedKey = await window.crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: saltBuffer,
+                    iterations: 600000, // Hohe Härtung gegen massive parallele Rechenleistung
+                    hash: "SHA-256"
+                },
+                baseKey,
+                { name: "AES-GCM", length: 256 }, // 256-Bit echte symmetrische Verschlüsselung
+                false,
+                ["encrypt", "decrypt"]
+            );
+
+            document.getElementById('auth-status').innerText = `🔑 Vektoren für ${user} erfolgreich kalibriert.`;
+            document.getElementById('auth-status').style.color = "#00ff00";
+            document.getElementById('comm-section').style.display = "block";
+            document.getElementById('auth-section').style.border = "1px solid #005500";
+        } catch (e) {
+            alert("Fehler bei der Schlüsselgenerierung: " + e.message);
+        }
+    }
+
+    // NACHRICHT VERSCHLÜSSELN (OUTPUT FÜR DISCUSSIONS)
+    async function encryptAndShowMessage() {
+        const text = document.getElementById('messageInput').value;
+        if(!text) return;
+
+        try {
+            // Einzigartiger Initialisierungsvektor (IV) für jedes Datenpaket
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const encodedText = textToBuffer(`[${currentUsername}]: ${text}`);
+
+            const ciphertext = await window.crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                derivedKey,
+                encodedText
+            );
+
+            // Paketierung: IV (12 Bytes) + Ciphertext zusammenfügen
+            const packet = new Uint8Array(iv.length + ciphertext.byteLength);
+            packet.set(iv, 0);
+            packet.set(new Uint8Array(ciphertext), iv.length);
+
+            const base64Packet = arrayBufferToBase64(packet.buffer);
+            
+            // Formatierter Vektor-String für einfaches Kopieren am Handy
+            document.getElementById('outputCipher').value = `===AMAE-DATA===\n${base64Packet}\n===END-AMAE===`;
+            
+            // Lokal im Chat anzeigen
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `<div class="msg"><strong>Du:</strong> ${text}</div>`;
+            document.getElementById('messageInput').value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (e) {
+            alert("Verschlüsselungsfehler: " + e.message);
+        }
+    }
+
+    // NACHRICHT ENTSCHLÜSSELN (INPUT AUS COMMUNITY)
+    async function decryptIncomingMessage() {
+        const rawInput = document.getElementById('inputCipher').value;
+        if(!rawInput) return;
+
+        try {
+            // Bereinigen des Inputs von Headern
+            const cleanBase64 = rawInput.replace(/===AMAE-DATA===\n|===END-AMAE===|\s/g, '');
+            const packetBuffer = base64ToArrayBuffer(cleanBase64);
+            const packetArray = new Uint8Array(packetBuffer);
+
+            // IV und Ciphertext wieder trennen
+            const iv = packetArray.slice(0, 12);
+            const ciphertext = packetArray.slice(12);
+
+            const decryptedBuffer = await window.crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: iv },
+                derivedKey,
+                ciphertext
+            );
+
+            const decryptedText = bufferToText(decryptedBuffer);
+
+            // In der Chatbox ausgeben
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML += `<div class="msg" style="border-left-color: #00ffff;">${decryptedText}</div>`;
+            document.getElementById('inputCipher').value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (e) {
+            alert("Entschlüsselung fehlgeschlagen! Entweder falsches Passwort/User oder beschädigter Vektor-Datensatz.");
+    }
+}
+</script>
+
+</body>
+</html>

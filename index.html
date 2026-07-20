@@ -118,8 +118,16 @@
         <textarea id="inputCipher" rows="4" placeholder="Füge hier den verschlüsselten Textblock eines anderen Users ein..."></textarea>
         <button onclick="decryptIncomingMessage()">Vektor paritätisch aufschlüsseln</button>
     </div>
-</div>
 
+    <!-- STEP 4: SYSTEM EXPLORER INTERFACE INJECTION -->
+    <div class="section" id="explorer-section" style="margin-top: 25px; border-color: #00ff00;">
+        <h2>4. System-Explorer-Schnittstelle</h2>
+        <button id="btn-toggle-explorer" onclick="loadExplorerScripts()">Globalen Explorer aktivieren</button>
+        
+        <!-- Hier injizieren die externen Skripte dynamisch das Interface -->
+        <div id="dynamic-explorer-container" style="margin-top: 15px;"></div>
+    </div>
+</div>
 <script>
     let derivedKey = null;
     let currentUsername = "";
@@ -265,9 +273,24 @@
             document.getElementById('inputCipher').value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
         } catch (e) {
-            alert("Entschlüsselung fehlgeschlagen! Entweder falsches Passwort/User oder beschädigter Vektor-Datensatz.");
+            alert("Entschlüsselung failed! Falsches Passwort/User oder beschädigter Vektor.");
+        }
     }
-}
+
+    // INTERFACE INJEKTION: Lädt die externen Explorer-Skripte dynamisch nach
+    function loadExplorerScripts() {
+        if (document.getElementById('global-explorer-script')) return; // Bereits aktiv
+
+        // 1. Global Explorer Skript laden
+        const scriptGlobal = document.createElement('script');
+        scriptGlobal.id = 'global-explorer-script';
+        scriptGlobal.src = 'scripts/global-explorer.js';
+        document.body.appendChild(scriptGlobal);
+        
+        // Button-Zustand paritätisch updaten
+        document.getElementById('btn-toggle-explorer').innerText = "Explorer-Systeme aktiv 🌐";
+        document.getElementById('btn-toggle-explorer').disabled = true;
+    }
 </script>
 
 </body>

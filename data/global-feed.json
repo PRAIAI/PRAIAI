@@ -1,0 +1,36 @@
+{
+  "feed": [
+    {
+      "id": 1,
+      "timestamp": "2026-07-21 00:00:01",
+      "category": "satoramy_registration",
+      "prev_hash": "0",
+      "curr_hash": "A",
+      "cipher": "===AMAE-DATA===\neyJpdiI6IlpYSnJZVzF5ZEdWeU9rRk5RVVVVVkVVM01URT0iLCJkYXRhIjoiTlpRUU9FWFQwMXM0RFZWeVpHbHVaRzFwYm1saGRHOXlaV0Z6ZEhKMWN6RT0ifQ==\n===END-AMAE==="
+    },
+    {
+      "id": 2,
+      "timestamp": "2026-07-21 00:05:22",
+      "category": "axiomatrix_activation",
+      "prev_hash": "A",
+      "curr_hash": "AA",
+      "cipher": "===AMAE-DATA===\nZEhKMWN6RTBWRlZSWjA1SFZreERWRkpVVkVNd01RPT02MDBraXRlcmF0aW9ucw==\n===END-AMAE==="
+    },
+    {
+      "id": 3,
+      "timestamp": "2026-07-21 01:15:00",
+      "category": "amae_explorer_sync",
+      "prev_hash": "AA",
+      "curr_hash": "AAA",
+      "cipher": "===AMAE-DATA===\nU1lOQy1PQkpFQ1QtREVURVJNSU5JU1RJQy00RC1DQUxJQlJBVElPTg==\n===END-AMAE==="
+    },
+    {
+      "id": 4,
+      "timestamp": "2026-07-21 01:18:00",
+      "category": "matrix_dimension_lock",
+      "prev_hash": "AAA",
+      "curr_hash": "AAAA",
+      "cipher": "===AMAE-DATA===\nQU1BRS1TWVNURU0tTE9DS0VELUFORC1PUEVSQVRJT05BTA==\n===END-AMAE==="
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-// A.M.A.E. Background Engine & Persistence Controller (app.js)
+// A.M.A.E. Background Engine & Persistence Controller (app.js) - Persistent Matrix Edition
 (function() {
     console.log("🔋 Simultanes app.js Persistenz-Modul im Hintergrund aktiv.");
 
@@ -6,21 +6,22 @@
     const STORAGE_KEYS = {
         CHAT_HISTORY: "amae_persistent_chat",
         LAST_USER: "amae_last_logged_user",
-        LOCAL_LEDGER: "amae_blockchain_ledger"
+        LOCAL_LEDGER: "amae_blockchain_ledger",
+        IS_AUTHENTICATED: "amae_matrix_auth_state"
     };
 
-    // 1. SIMULTANE KOPPLUNG AN DAS INTERFACE (Sobald DOM bereit ist)
+    // 1. SIMULTANE KOPPLUNG AN DAS INTERFACE
     document.addEventListener("DOMContentLoaded", function() {
         restorePersistentData();
         setupSimultaneousHooks();
     });
 
-    // 2. KOPPELT SICH AUTOMATISCH AN DIE BESTEHENDEN INDEX-FUNKTIONEN
+    // 2. KOPPELT SICH AUTOMATISCH AN DIE INTRERFACE-PROZESSE
     function setupSimultaneousHooks() {
         const btnEncrypt = document.querySelector("button[onclick='encryptAndShowMessage()']");
         const btnDecrypt = document.querySelector("button[onclick='decryptIncomingMessage()']");
         
-        // Erweitert die Verschlüsselung um automatische Hintergrund-Speicherung
+        // Speichert, sobald eine Nachricht verschlüsselt wird
         if (btnEncrypt) {
             const originalEncrypt = window.encryptAndShowMessage;
             window.encryptAndShowMessage = async function() {
@@ -29,7 +30,7 @@
             };
         }
 
-        // Erweitert die Entschlüsselung um automatische Hintergrund-Speicherung
+        // Speichert, sobald eine Nachricht entschlüsselt wird
         if (btnDecrypt) {
             const originalDecrypt = window.decryptIncomingMessage;
             window.decryptIncomingMessage = async function() {
@@ -37,9 +38,24 @@
                 saveCurrentChatState();
             };
         }
+
+        // Lauscht auf den Login-Button, um den persistenten Zustand zu setzen
+        const btnLogin = document.querySelector("button[onclick='initializeCrypto()']");
+        if (btnLogin) {
+            const originalLogin = window.initializeCrypto;
+            window.initializeCrypto = async function() {
+                await originalLogin();
+                // Wenn der Login erfolgreich war, ist das comm-section sichtbar
+                const commSection = document.getElementById("comm-section");
+                if (commSection && commSection.style.display !== "none") {
+                    localStorage.setItem(STORAGE_KEYS.IS_AUTHENTICATED, "true");
+                    saveCurrentChatState();
+                }
+            };
+        }
     }
 
-    // 3. DATEN AUS DEM FLASH-SPEICHER DES HANDYS LÖSCHEN/LADEN
+    // 3. DATEN IM FLASH-SPEICHER DES HANDYS SICHERN
     function saveCurrentChatState() {
         const chatBox = document.getElementById("chatBox");
         const usernameInput = document.getElementById("username");
@@ -53,36 +69,55 @@
         console.log("💾 Datenpaket persistent im Smartphone-Speicher gesichert.");
     }
 
-    // 4. RESTAURIERT DIE DATEN AUTOMATISCH BEIM NEUSTART DER WEBSEITE
+    // 4. RESTAURIERT DIE DATEN UND DEN MATRIX-ZUSTAND AUTOMATISCH BEIM NEUSTART
     function restorePersistentData() {
         const chatBox = document.getElementById("chatBox");
         const usernameInput = document.getElementById("username");
+        const authState = localStorage.getItem(STORAGE_KEYS.IS_AUTHENTICATED);
 
         const savedChat = localStorage.getItem(STORAGE_KEYS.CHAT_HISTORY);
         const savedUser = localStorage.getItem(STORAGE_KEYS.LAST_USER);
 
+        if (savedUser && usernameInput) {
+            usernameInput.value = savedUser;
+        }
+
         if (savedChat && chatBox) {
-            // Lädt den alten verschlüsselten/entschlüsselten Chatverlauf direkt wieder in die Box
             chatBox.innerHTML = savedChat;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        if (savedUser && usernameInput) {
-            // Setzt Ihren Benutzernamen automatisch wieder ein, damit Sie ihn nicht neu tippen müssen
-            usernameInput.value = savedUser;
+        // Wenn das Handy als eingeloggt markiert ist, bauen wir die Matrix um
+        if (authState === "true") {
+            console.log("🔐 Autorisierter Matrix-Zustand erkannt. Schalte Interface um.");
+            
+            const commSection = document.getElementById('comm-section');
+            const authSection = document.getElementById('auth-section');
+            const status = document.getElementById('auth-status');
+
+            if (commSection) commSection.style.display = "block";
+            if (authSection) authSection.style.border = "1px solid #005500";
+            
+            if (status) {
+                status.innerText = `🔑 Vektoren für ${savedUser || 'User'} aktiv geladen (Persistent).`;
+                status.style.color = "#00ff00";
+            }
+
+            // Ruft die Umschalt-Funktion aus der index.html auf, um Logout/Settings anzuzeigen
+            if (typeof window.switchMatrixToAuthenticated === "function") {
+                window.switchMatrixToAuthenticated();
+            }
         }
         
-        console.log("🔄 Persistente Daten erfolgreich aus dem localStorage dechiffriert/wiederhergestellt.");
+        console.log("🔄 Persistenz-Check abgeschlossen.");
     }
 
-    // 5. GLOBALE RESET-FUNKTION (Sollten Sie jemals den Speicher leeren wollen)
-    window.purgeAmaeStorage = function() {
-        if(confirm("Möchten Sie alle persistenten Verläufe lokal auf diesem Handy unwiderruflich löschen?")) {
-            localStorage.removeItem(STORAGE_KEYS.CHAT_HISTORY);
-            localStorage.removeItem(STORAGE_KEYS.LAST_USER);
-            localStorage.removeItem(STORAGE_KEYS.LOCAL_LEDGER);
-            alert("Speicher bereinigt. Starten Sie die Seite neu.");
-            window.location.reload();
-        }
-    };
+    // 5. ERWEITERTER LOGOUT-HOOK (Löscht den Zustand aus dem Speicher)
+    if (window.executeMatrixLogout) {
+        const originalLogout = window.executeMatrixLogout;
+        window.executeMatrixLogout = function() {
+            localStorage.removeItem(STORAGE_KEYS.IS_AUTHENTICATED);
+            originalLogout();
+        };
+    }
 })();

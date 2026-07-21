@@ -277,7 +277,7 @@
         }
     }
 
-    // INTERFACE INJEKTION: Lädt die externen Explorer-Skripte dynamisch nach
+        // INTERFACE INJEKTION: Lädt die externen Explorer-Skripte dynamisch nach
     function loadExplorerScripts() {
         if (document.getElementById('global-explorer-script')) return; // Bereits aktiv
 
@@ -286,6 +286,12 @@
         scriptGlobal.id = 'global-explorer-script';
         scriptGlobal.src = 'scripts/global-explorer.js';
         document.body.appendChild(scriptGlobal);
+        
+        // 2. Performance Skript laden (Quantum EVM & BTC Shore Protection)
+        const scriptPerf = document.createElement('script');
+        scriptPerf.id = 'quantum-performance-script';
+        scriptPerf.src = 'scripts/performance.js';
+        document.body.appendChild(scriptPerf);
         
         // Button-Zustand paritätisch updaten
         document.getElementById('btn-toggle-explorer').innerText = "Explorer-Systeme aktiv 🌐";
